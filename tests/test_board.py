@@ -10,15 +10,16 @@ def test_has_piece():
 
 def test_get_row_number():
     # Asserts if get_row_number correctly returns the row for a given position. The first row is 0.
+    # Positions are also zero-indexed.
     test_board = Board([])
+    assert test_board.get_row_number(2) == 0
     assert test_board.get_row_number(3) == 0
-    assert test_board.get_row_number(4) == 0
-    assert test_board.get_row_number(5) == 1
+    assert test_board.get_row_number(4) == 1
 
 def test_get_col_number():
     # Asserts if get_col_number correctly returns the column for a given position. The first column is 0.
     test_board = Board([])
-    assert test_board.get_col_number(1) == 0
-    assert test_board.get_col_number(2) == 2
-    assert test_board.get_col_number(5) == 1
-    assert test_board.get_col_number(32) == 7
+    assert test_board.get_col_number(0) == 0
+    assert test_board.get_col_number(1) == 2
+    assert test_board.get_col_number(4) == 1
+    assert test_board.get_col_number(31) == 7
