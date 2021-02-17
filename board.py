@@ -1,6 +1,6 @@
 class Board:
     def __init__(self, pieces):
-        # Example: [12WN, 14BN, 24WY]
+        # Example: [Piece('12WN'), Piece('14BN'), Piece('24WY')]
         self.pieces = pieces
     
     def has_piece(self, position):
@@ -8,7 +8,7 @@ class Board:
         string_pos = str(position)
 
         for piece in self.pieces:
-            if piece[:-2] == string_pos:
+            if piece.get_position() == string_pos:
                 return True
 
         return False

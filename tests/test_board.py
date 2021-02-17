@@ -1,10 +1,11 @@
 import sys
 sys.path.append('..')
 from board import Board
+from piece import Piece
 
 def test_has_piece():
     # Simple test to assert has_piece detects a piece on a given position.
-    test_board = Board(['12WY', '26BY', '8WN'])
+    test_board = Board([Piece('12WY'), Piece('26BY'), Piece('8WN')])
     assert test_board.has_piece(26) == True
     assert test_board.has_piece(10) == False
 

@@ -3,11 +3,11 @@ class Piece:
         # Example: <position><color><isKing?> 16WN
         self.name = name
     
-    def getPosition(self):
+    def get_position(self):
         return self.name[:-2]
 
-    def getColor(self):
+    def get_color(self):
         return self.name[-2]
 
-    def isKing(self):
+    def is_king(self):
         return True if self.name[-1] == 'Y' else False
