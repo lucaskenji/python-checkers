@@ -31,7 +31,39 @@ class Board:
         return column_position + 1 if is_row_odd else column_position
     
     def get_row(self, row_number):
-        pass
+        # Receives a row number, returns a set with all pieces contained in it.
+        # [0, 1, 2, 3] represents the first row of the board. All rows contain four squares.
+        # row_pos needs to contain strings on it because Piece.get_position() returns a number in type string.
+
+        row_pos = [0, 1, 2, 3]
+        row_pos = list(map((lambda pos: str(pos + (4 * row_number))), row_pos))
+        row = []
+
+        for piece in self.pieces:
+            if piece.get_position() in row_pos:
+                row.append(piece)
+
+        return set(row)
     
     def get_pieces_by_coords(self, *coords):
-        pass
+        # Receives a variable number of (row, column) pairs.
+        # Returns a ordered list of same length with a Piece if found, otherwise None.
+        row_memory = dict() # Used to not have to keep calling get_row().
+        results = []
+
+        for coord_pair in coords:
+            if coord_pair[0] in row_memory:
+                current_row = row_memory[coord_pair[0]]
+            else:
+                current_row = self.get_row(coord_pair[0])
+                row_memory[coord_pair[0]] = current_row
+            
+            for piece in current_row:
+                if self.get_col_number(int(piece.get_position())) == coord_pair[1]:
+                    results.append(piece)
+                    break
+            else:
+                # This runs if 'break' isn't called on the for loop above.
+                results.append(None)
+        
+        return results
