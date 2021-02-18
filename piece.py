@@ -13,4 +13,5 @@ class Piece:
         return True if self.name[-1] == 'Y' else False
     
     def get_moves(self, board):
+        
         pass

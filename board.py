@@ -29,3 +29,9 @@ class Board:
         column_position = remainder * 2 # because the squares have a gap of one light square.
         is_row_odd = not (self.get_row_number(position) % 2 == 0)
         return column_position + 1 if is_row_odd else column_position
+    
+    def get_row(self, row_number):
+        pass
+    
+    def get_pieces_by_coords(self, *coords):
+        pass

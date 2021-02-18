@@ -24,3 +24,16 @@ def test_get_col_number():
     assert test_board.get_col_number(1) == 2
     assert test_board.get_col_number(4) == 1
     assert test_board.get_col_number(31) == 7
+
+def test_get_row():
+    # Checks if a row is properly returned.
+    test_white = Piece('4WN')
+    test_black = Piece('6BN')
+    test_board = Board([test_white, test_black], 'B')
+    assert test_board.get_row(1) == {test_white, test_black}
+
+def test_get_pieces_by_coords():
+    # This method should receive (row, column) pairs and return the pieces on these coordinates.
+    test_piece = Piece('8WN')
+    test_board = Board([test_piece], 'W')
+    assert test_board.get_pieces_by_coords((2, 0), (3, 0)) == [test_piece, None]
