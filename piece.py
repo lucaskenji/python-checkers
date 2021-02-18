@@ -11,3 +11,6 @@ class Piece:
 
     def is_king(self):
         return True if self.name[-1] == 'Y' else False
+    
+    def get_moves(self, board):
+        pass

@@ -1,8 +1,12 @@
 class Board:
-    def __init__(self, pieces):
-        # Example: [Piece('12WN'), Piece('14BN'), Piece('24WY')]
+    def __init__(self, pieces, color_up):
+        # Example: [Piece('12WND'), Piece('14BNU'), Piece('24WYD')]
         self.pieces = pieces
+        self.color_up = color_up # Defines which of the colors is moving up.
     
+    def get_color_up(self):
+        return self.color_up
+
     def has_piece(self, position):
         # Receives position (e.g.: 28), returns True if there's a piece in that position
         string_pos = str(position)
