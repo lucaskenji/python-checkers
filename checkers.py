@@ -1,6 +1,7 @@
 import pygame as pg
 from sys import exit
 from pygame.locals import *
+from board_gui import BoardGUI
 
 def main():
     pg.init()
@@ -10,11 +11,12 @@ def main():
     pg.display.set_caption('Checkers in Python')
     fps_clock = pg.time.Clock()
 
-    BOARD_BG = pg.image.load('images/board.png')
-    BOARD_RECT = (26, 26)
+    board_gui = BoardGUI((26, 26))
 
     while True:
-        DISPLAYSURF.blit(BOARD_BG, BOARD_RECT)
+        DISPLAYSURF.fill((0, 0, 0))
+        board_gui.draw_board(DISPLAYSURF)
+
         for event in pg.event.get():
             if event.type == QUIT:
                 pg.quit()
