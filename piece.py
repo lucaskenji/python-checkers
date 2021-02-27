@@ -12,6 +12,16 @@ class Piece:
     def is_king(self):
         return True if self.name[-1] == 'Y' else False
     
+    def set_position(self, new_position):
+        # Receives a new position and assigns it.
+        # position_index is used because the position part of self.name can be a one or two digit number. 
+        position_index = 1 if len(self.name) == 3 else 2
+        self.name = str(new_position) + self.name[position_index:]
+    
+    def set_is_king(self, new_is_king):
+        is_king = "Y" if new_is_king else "N"
+        self.name = self.name[:-1] + is_king
+    
     def get_adjacent_squares(self, board):
         # Receives a Board object, returns at max four squares, all of which are potential moves
         current_col = board.get_col_number(int(self.get_position()))
