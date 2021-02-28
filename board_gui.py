@@ -29,8 +29,7 @@ class BoardGUI:
     def get_piece_rects(self, pieces):
         # Receives a list of Piece instances, returns a list of appropriate positions on the board as a tuple (x, y)
         TOPLEFTBORDER = (34, 34)
-        HORIZONTAL_DIST = 112
-        VERTICAL_DIST = 56
+        SQUARE_DIST = 56
         rects = []
 
         for piece in pieces:
@@ -39,7 +38,7 @@ class BoardGUI:
             column = self.board.get_col_number(pos)
             
             # Calculates where the piece should be based on row and column positions
-            rects.append(get_piece_gui_coords((row, column), [(HORIZONTAL_DIST, VERTICAL_DIST), TOPLEFTBORDER]))
+            rects.append(get_piece_gui_coords((row, column), SQUARE_DIST, TOPLEFTBORDER))
         
         return rects
     
