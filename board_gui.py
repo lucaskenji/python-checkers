@@ -23,6 +23,7 @@ class BoardGUI:
         self.piece_colors = self.get_piece_colors(pieces)
         self.piece_status = self.get_piece_status(pieces)
         self.board_rect = board_rect
+        self.held_piece = None
 
     def get_piece_rects(self, pieces):
         # Receives a list of Piece instances, returns a list of appropriate positions on the board as a tuple (x, y)
@@ -69,3 +70,11 @@ class BoardGUI:
 
         for index, piece_rect in enumerate(self.piece_rects):
             display_surface.blit(BLACK_PIECE_SURFACE if self.piece_colors[index] == "B" else WHITE_PIECE_SURFACE, piece_rect)
+    
+    def get_mouse_on_piece(self, mouse_pos):
+        # Given a tuple with the mouse's x and y position, returns the piece's name.
+        pass
+    
+    def set_held_piece(self, position):
+        # Given a piece's position, hide it in the board and set it as this object's held_piece attribute.
+        pass
