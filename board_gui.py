@@ -1,5 +1,6 @@
 from board import Board
 from piece import Piece
+from utils import get_piece_gui_coords
 import pygame
 
 BLACK_PIECE_SURFACE = pygame.image.load("images/black_piece.png")
@@ -38,11 +39,7 @@ class BoardGUI:
             column = self.board.get_col_number(pos)
             
             # Calculates where the piece should be based on row and column positions
-            x_pos = TOPLEFTBORDER[0] + (HORIZONTAL_DIST * (column // 2))
-            x_pos = x_pos if row % 2 == 0 else x_pos + VERTICAL_DIST
-            y_pos = TOPLEFTBORDER[1] + (VERTICAL_DIST * row)
-
-            rects.append((x_pos, y_pos))
+            rects.append(get_piece_gui_coords((row, column), [(HORIZONTAL_DIST, VERTICAL_DIST), TOPLEFTBORDER]))
         
         return rects
     

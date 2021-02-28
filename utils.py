@@ -13,4 +13,11 @@ def get_piece_gui_coords(coords, gui_properties):
     horizontal_distance = gui_properties[0][0]
     vertical_distance = gui_properties[0][1]
     top_left_coords = gui_properties[1]
-    pass
+    row = coords[0]
+    column = coords[1]
+    
+    x_pos = top_left_coords[0] + (horizontal_distance * (column // 2))
+    x_pos = x_pos if row % 2 == 0 else x_pos + vertical_distance
+    y_pos = top_left_coords[1] + (vertical_distance * row)
+    
+    return (x_pos, y_pos)
