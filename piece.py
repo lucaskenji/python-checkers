@@ -1,3 +1,5 @@
+from utils import get_position_with_row_col
+
 class Piece:
     def __init__(self, name):
         # Example: <position><color><isKing?> 16WN
@@ -53,7 +55,8 @@ class Piece:
             else:
                 position_to_eat = (coords[0] + (coords[0] - current_row), coords[1] - 1)
             
-            position_num = (position_to_eat[0] * 4) + (position_to_eat[1] // 2) # Finds position (0-31) in board based on row and column.
+            position_num = get_position_with_row_col(position_to_eat[0], position_to_eat[1])
+            
             return None if board.has_piece(position_num) else position_num
 
         current_col = board.get_col_number(int(self.get_position()))
@@ -80,7 +83,7 @@ class Piece:
         if len(possible_moves) == 0:
             # This is skipped if this piece can eat any other, because it is forced to eat it.
             for index in empty_squares:
-                new_position = (possible_coords[index][0] * 4) + (possible_coords[index][1] // 2)
+                new_position = get_position_with_row_col(possible_coords[index][0], possible_coords[index][1])
                 possible_moves.append(str(new_position))
         
         return set(possible_moves)
