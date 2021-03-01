@@ -1,10 +1,13 @@
 from board import Board
 from piece import Piece
-from utils import get_piece_gui_coords
+from held_piece import HeldPiece
+from utils import get_piece_gui_coords, get_surface_mouse_offset
 import pygame
 
 BLACK_PIECE_SURFACE = pygame.image.load("images/black_piece.png")
 WHITE_PIECE_SURFACE = pygame.image.load("images/white_piece.png")
+BLACK_KING_PIECE_SURFACE = pygame.image.load("images/black_king_piece.png")
+WHITE_KING_PIECE_SURFACE = pygame.image.load("images/white_king_piece.png")
 BOARD = pygame.image.load("images/board.png")
 TOPLEFTBORDER = (34, 34)
 SQUARE_DIST = 56
@@ -27,6 +30,7 @@ class BoardGUI:
         self.piece_status = self.get_piece_status(pieces)
         self.board_rect = board_rect
         self.held_piece = None
+        self.held_piece_index = -1
 
     def get_piece_rects(self, pieces):
         # Receives a list of Piece instances, returns a list of appropriate positions on the board as a tuple (x, y)
@@ -60,13 +64,34 @@ class BoardGUI:
         
         return status
 
+    def draw_gui(self, display_surface):
+        # Draws the board along with its pieces and any piece being held with the mouse.
+        self.draw_board(display_surface)
+        
+        if self.held_piece is not None:
+            self.held_piece.draw_piece(display_surface)
+
     def draw_board(self, display_surface):
         # Draws a board and its pieces on the display surface.
         display_surface.blit(BOARD, self.board_rect)
 
         for index, piece_rect in enumerate(self.piece_rects):
+            if self.held_piece is not None:
+                if index == self.held_piece_index:
+                    continue
+
             display_surface.blit(BLACK_PIECE_SURFACE if self.piece_colors[index] == "B" else WHITE_PIECE_SURFACE, piece_rect)
     
+    def hold_piece_with_mouse(self, mouse_pos):
+        # If a piece is clicked in the given mouse position, makes a piece follow the mouse and hides it from the board.
+        piece_clicked = self.get_piece_on_mouse(mouse_pos)
+
+        if piece_clicked is not None:
+            self.set_held_piece(int(piece_clicked.get_position()), mouse_pos)
+    
+    def release_piece(self):
+        self.set_held_piece(-1, None)
+
     def get_piece_on_mouse(self, mouse_pos):
         # Given a tuple with the mouse's x and y position, returns the piece clicked or None if no piece was clicked.
         piece_index = -1
@@ -80,8 +105,13 @@ class BoardGUI:
         
         return self.board.get_piece_by_index(piece_index)
     
-    def set_held_piece(self, position):
-        # Given a piece's position as an integer, set it as this object's held_piece attribute.
+    def set_held_piece(self, position, mouse_pos):
+        # Given a piece's position as an integer, finds the piece object and sets held_piece and held_piece_index.
+        # Sets held_piece to None if -1 is given as a position.
+        if position == -1:
+            self.held_piece = None
+            return
+
         piece_row = self.board.get_row_number(position)
         piece_column = self.board.get_col_number(position)
 
@@ -89,4 +119,16 @@ class BoardGUI:
 
         for index, rect in enumerate(self.piece_rects):
             if rect.colliderect(piece_rect):
-                self.held_piece = index
+                piece_to_hold = self.board.get_piece_by_index(index)
+                offset = get_surface_mouse_offset(piece_rect, mouse_pos)
+                self.held_piece = HeldPiece(self.get_piece_surface(piece_to_hold.get_color(), piece_to_hold.is_king()), offset)
+                self.held_piece_index = index
+    
+    def get_piece_surface(self, color, is_king):
+        # Given color and king properties, returns an appropriate surface.
+        piece_surfaces = [BLACK_KING_PIECE_SURFACE, WHITE_KING_PIECE_SURFACE] if is_king else [BLACK_PIECE_SURFACE, WHITE_PIECE_SURFACE]
+
+        if color == "B":
+            return piece_surfaces[0]
+        else:
+            return piece_surfaces[1]

@@ -29,3 +29,7 @@ def get_piece_gui_coords(coords, square_dist, top_left_coords):
     y_pos = top_left_coords[1] + (vertical_distance * piece_row)
     
     return (x_pos, y_pos)
+
+def get_surface_mouse_offset(surface_pos, mouse_pos):
+    # Receives the position (x, y) of a surface and the mouse. Returns the offset used to determine where the surface was clicked.
+    return (surface_pos[0] - mouse_pos[0], surface_pos[1] - mouse_pos[1])

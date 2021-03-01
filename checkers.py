@@ -15,12 +15,18 @@ def main():
 
     while True:
         DISPLAYSURF.fill((0, 0, 0))
-        board_gui.draw_board(DISPLAYSURF)
+        board_gui.draw_gui(DISPLAYSURF)
 
         for event in pg.event.get():
             if event.type == QUIT:
                 pg.quit()
                 return
+            
+            if event.type == MOUSEBUTTONDOWN:
+                board_gui.hold_piece_with_mouse(event.pos)
+            
+            if event.type == MOUSEBUTTONUP:
+                board_gui.release_piece()
         
         pg.display.update()
         fps_clock.tick(FPS)
