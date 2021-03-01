@@ -38,7 +38,7 @@ class BoardGUI:
             column = self.board.get_col_number(pos)
             
             # Calculates where the piece should be based on row and column positions
-            rects.append(get_piece_gui_coords((row, column), SQUARE_DIST, TOPLEFTBORDER))
+            rects.append(pygame.Rect(get_piece_gui_coords((row, column), SQUARE_DIST, TOPLEFTBORDER), (41, 41)))
         
         return rects
     
@@ -67,9 +67,18 @@ class BoardGUI:
         for index, piece_rect in enumerate(self.piece_rects):
             display_surface.blit(BLACK_PIECE_SURFACE if self.piece_colors[index] == "B" else WHITE_PIECE_SURFACE, piece_rect)
     
-    def get_mouse_on_piece(self, mouse_pos):
-        # Given a tuple with the mouse's x and y position, returns the piece's name.
-        pass
+    def get_piece_on_mouse(self, mouse_pos):
+        # Given a tuple with the mouse's x and y position, returns the piece's name or None if no piece was clicked.
+        piece_index = -1
+
+        for index, piece_rect in enumerate(self.piece_rects):
+            if piece_rect.collidepoint(mouse_pos):
+                piece_index = index
+                break
+        else:
+            return None
+        
+        return self.board.get_piece_by_index(piece_index).get_name()
     
     def set_held_piece(self, position):
         # Given a piece's position, hide it in the board and set it as this object's held_piece attribute.

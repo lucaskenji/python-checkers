@@ -7,8 +7,8 @@ class Board:
     def get_color_up(self):
         return self.color_up
 
-    def get_pieces(self):
-        return self.pieces
+    def get_piece_by_index(self, index):
+        return self.pieces[index]
 
     def has_piece(self, position):
         # Receives position (e.g.: 28), returns True if there's a piece in that position
