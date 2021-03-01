@@ -6,6 +6,8 @@ import pygame
 BLACK_PIECE_SURFACE = pygame.image.load("images/black_piece.png")
 WHITE_PIECE_SURFACE = pygame.image.load("images/white_piece.png")
 BOARD = pygame.image.load("images/board.png")
+TOPLEFTBORDER = (34, 34)
+SQUARE_DIST = 56
 
 class BoardGUI:
     def __init__(self, board_rect):
@@ -28,8 +30,6 @@ class BoardGUI:
 
     def get_piece_rects(self, pieces):
         # Receives a list of Piece instances, returns a list of appropriate positions on the board as a tuple (x, y)
-        TOPLEFTBORDER = (34, 34)
-        SQUARE_DIST = 56
         rects = []
 
         for piece in pieces:
@@ -68,7 +68,7 @@ class BoardGUI:
             display_surface.blit(BLACK_PIECE_SURFACE if self.piece_colors[index] == "B" else WHITE_PIECE_SURFACE, piece_rect)
     
     def get_piece_on_mouse(self, mouse_pos):
-        # Given a tuple with the mouse's x and y position, returns the piece's name or None if no piece was clicked.
+        # Given a tuple with the mouse's x and y position, returns the piece clicked or None if no piece was clicked.
         piece_index = -1
 
         for index, piece_rect in enumerate(self.piece_rects):
@@ -78,8 +78,15 @@ class BoardGUI:
         else:
             return None
         
-        return self.board.get_piece_by_index(piece_index).get_name()
+        return self.board.get_piece_by_index(piece_index)
     
     def set_held_piece(self, position):
-        # Given a piece's position, hide it in the board and set it as this object's held_piece attribute.
-        pass
+        # Given a piece's position as an integer, set it as this object's held_piece attribute.
+        piece_row = self.board.get_row_number(position)
+        piece_column = self.board.get_col_number(position)
+
+        piece_rect = pygame.Rect(get_piece_gui_coords((piece_row, piece_column), SQUARE_DIST, TOPLEFTBORDER), (41, 41))
+
+        for index, rect in enumerate(self.piece_rects):
+            if rect.colliderect(piece_rect):
+                self.held_piece = index
