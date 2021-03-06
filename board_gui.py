@@ -17,10 +17,10 @@ class BoardGUI:
         # Initial setup
         pieces = []
 
-        for opponent_piece in range(0, 8):
+        for opponent_piece in range(0, 12):
             pieces.append(Piece(str(opponent_piece) + 'BN'))
         
-        for player_piece in range(24, 32):
+        for player_piece in range(20, 32):
             pieces.append(Piece(str(player_piece) + 'WN'))
 
         # Attributes
