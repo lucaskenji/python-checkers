@@ -10,8 +10,8 @@ def get_piece_position(coords, square_dist, top_left_coords):
     x_offset = top_left_coords[0]
     y_offset = top_left_coords[1]
     
-    piece_row = (coords[0] - x_offset) // square_dist
-    piece_column = (coords[1] - y_offset) // square_dist
+    piece_column = (coords[0] - x_offset) // square_dist
+    piece_row = (coords[1] - y_offset) // square_dist
 
     return get_position_with_row_col(piece_row, piece_column)
 

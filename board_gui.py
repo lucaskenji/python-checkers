@@ -1,7 +1,7 @@
 from board import Board
 from piece import Piece
 from held_piece import HeldPiece
-from utils import get_piece_gui_coords, get_surface_mouse_offset
+from utils import get_piece_gui_coords, get_surface_mouse_offset, get_piece_position
 import pygame
 
 BLACK_PIECE_SURFACE = pygame.image.load("images/black_piece.png")
@@ -31,6 +31,7 @@ class BoardGUI:
         self.board_rect = board_rect
         self.held_piece = None
         self.held_piece_index = -1
+        self.move_marks = []
 
     def get_piece_rects(self, pieces):
         # Receives a list of Piece instances, returns a list of appropriate positions on the board as a tuple (x, y)
@@ -68,7 +69,12 @@ class BoardGUI:
         # Draws the board along with its pieces and any piece being held with the mouse.
         self.draw_board(display_surface)
         
+        image_rect = pygame.image.load("images/marking.png")
+
         if self.held_piece is not None:
+            for move_mark in self.move_marks:
+                display_surface.blit(image_rect, move_mark)
+
             self.held_piece.draw_piece(display_surface)
 
     def draw_board(self, display_surface):
@@ -87,10 +93,23 @@ class BoardGUI:
         piece_clicked = self.get_piece_on_mouse(mouse_pos)
 
         if piece_clicked is not None:
+            for possible_move in piece_clicked.get_moves(self.board):
+                row = self.board.get_row_number(int(possible_move))
+                column = self.board.get_col_number(int(possible_move))
+                self.move_marks.append(pygame.Rect(get_piece_gui_coords((row, column), SQUARE_DIST, TOPLEFTBORDER), (44, 44)))
+
             self.set_held_piece(int(piece_clicked.get_position()), mouse_pos)
     
     def release_piece(self):
-        self.set_held_piece(-1, None)
+        if self.held_piece is not None:
+            released_on = self.held_piece.check_collision(self.move_marks)
+
+            if released_on is not None:
+                self.board.move_piece(self.held_piece_index, get_piece_position((released_on.x, released_on.y), SQUARE_DIST, TOPLEFTBORDER))
+                self.update_board()
+            
+            self.set_held_piece(-1, None)
+            self.move_marks = []
 
     def get_piece_on_mouse(self, mouse_pos):
         # Given a tuple with the mouse's x and y position, returns the piece clicked or None if no piece was clicked.
@@ -110,6 +129,7 @@ class BoardGUI:
         # Sets held_piece to None if -1 is given as a position.
         if position == -1:
             self.held_piece = None
+            self.held_piece_index = -1
             return
 
         piece_row = self.board.get_row_number(position)
@@ -132,3 +152,9 @@ class BoardGUI:
             return piece_surfaces[0]
         else:
             return piece_surfaces[1]
+    
+    def update_board(self):
+        pieces = self.board.get_pieces()
+        self.piece_rects = self.get_piece_rects(pieces)
+        self.piece_colors = self.get_piece_colors(pieces)
+        self.piece_status = self.get_piece_status(pieces)

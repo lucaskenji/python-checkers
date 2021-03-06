@@ -7,6 +7,9 @@ class Board:
     def get_color_up(self):
         return self.color_up
 
+    def get_pieces(self):
+        return self.pieces
+
     def get_piece_by_index(self, index):
         return self.pieces[index]
 
@@ -70,3 +73,6 @@ class Board:
                 results.append(None)
         
         return results
+    
+    def move_piece(self, index, new_position):
+        self.pieces[index].set_position(new_position)
