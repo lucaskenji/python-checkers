@@ -101,6 +101,7 @@ class BoardGUI:
             self.set_held_piece(int(piece_clicked.get_position()), mouse_pos)
     
     def release_piece(self):
+        # If a piece is released, tell the board to execute the move, remove all marks and stop holding the piece.
         if self.held_piece is not None:
             released_on = self.held_piece.check_collision(self.move_marks)
 

@@ -1,3 +1,5 @@
+from utils import get_position_with_row_col
+
 class Board:
     def __init__(self, pieces, color_up):
         # Example: [Piece('12WND'), Piece('14BNU'), Piece('24WYD')]
@@ -75,4 +77,33 @@ class Board:
         return results
     
     def move_piece(self, index, new_position):
-        self.pieces[index].set_position(new_position)
+        def is_eat_movement(current_position):
+            # If the difference in the rows of the current and next positions isn't 1, i.e. if the piece isn't moving one square, 
+            # then the piece is eating another piece.
+            return abs(self.get_row_number(current_position) - self.get_row_number(new_position)) != 1
+
+        def get_eaten_index(current_position):
+            current_coords = [self.get_row_number(current_position), self.get_col_number(current_position)]
+            new_coords = [self.get_row_number(new_position), self.get_col_number(new_position)]
+            eaten_coords = [current_coords[0], current_coords[1]]
+
+            # Dividing by 2 because neither the current position or the new one is desired, but the one in the middle.
+            # Getting the difference between the new coordinates and current coordinates helps getting the direction.
+            eaten_coords[0] += (new_coords[0] - current_coords[0]) // 2
+            eaten_coords[1] += (new_coords[1] - current_coords[1]) // 2
+
+            # Converting to string to compare later.
+            eaten_position = str(get_position_with_row_col(eaten_coords[0], eaten_coords[1]))
+
+            for index, piece in enumerate(self.pieces):
+                if piece.get_position() == eaten_position:
+                    return index
+
+        piece_to_move = self.pieces[index]
+
+        # Delete piece from the board if this move eats another piece
+        if is_eat_movement(int(piece_to_move.get_position())):
+            self.pieces.pop(get_eaten_index(int(piece_to_move.get_position()))) 
+
+        # Actually move
+        piece_to_move.set_position(new_position)
