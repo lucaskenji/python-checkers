@@ -99,11 +99,26 @@ class Board:
                 if piece.get_position() == eaten_position:
                     return index
 
+        def is_king_movement(piece):
+            # Receives the piece moving and returns True if the move turns that piece into a king.
+            if piece.is_king() == True:
+                return False
+            
+            end_row = self.get_row_number(new_position)
+            piece_color = piece.get_color()
+            king_row = 0 if self.color_up == piece_color else 7
+
+            return end_row == king_row
+
         piece_to_move = self.pieces[index]
 
         # Delete piece from the board if this move eats another piece
         if is_eat_movement(int(piece_to_move.get_position())):
             self.pieces.pop(get_eaten_index(int(piece_to_move.get_position()))) 
+
+        # Turn piece into a king if it reaches the other side of the board
+        if is_king_movement(piece_to_move):
+            piece_to_move.set_is_king(True)
 
         # Actually move
         piece_to_move.set_position(new_position)

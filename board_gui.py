@@ -86,7 +86,10 @@ class BoardGUI:
                 if index == self.held_piece_index:
                     continue
 
-            display_surface.blit(BLACK_PIECE_SURFACE if self.piece_colors[index] == "B" else WHITE_PIECE_SURFACE, piece_rect)
+            if self.piece_status[index]:
+                display_surface.blit(BLACK_KING_PIECE_SURFACE if self.piece_colors[index] == "B" else WHITE_KING_PIECE_SURFACE, piece_rect)
+            else:
+                display_surface.blit(BLACK_PIECE_SURFACE if self.piece_colors[index] == "B" else WHITE_PIECE_SURFACE, piece_rect)
     
     def hold_piece_with_mouse(self, mouse_pos):
         # If a piece is clicked in the given mouse position, makes a piece follow the mouse and hides it from the board.
