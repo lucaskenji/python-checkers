@@ -81,12 +81,12 @@ class Piece:
                 if position_to_eat is None:
                     continue
                 
-                possible_moves.append(str(position_to_eat))
+                possible_moves.append({"position": str(position_to_eat), "eats_piece": True})
 
         if len(possible_moves) == 0:
             # This is skipped if this piece can eat any other, because it is forced to eat it.
             for index in empty_squares:
                 new_position = get_position_with_row_col(possible_coords[index][0], possible_coords[index][1])
-                possible_moves.append(str(new_position))
+                possible_moves.append({"position": str(new_position), "eats_piece": False})
         
-        return set(possible_moves)
+        return possible_moves
