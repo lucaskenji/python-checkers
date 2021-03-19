@@ -91,11 +91,14 @@ class BoardGUI:
             else:
                 display_surface.blit(BLACK_PIECE_SURFACE if self.piece_colors[index] == "B" else WHITE_PIECE_SURFACE, piece_rect)
     
-    def hold_piece_with_mouse(self, mouse_pos):
+    def hold_piece_with_mouse(self, mouse_pos, game_control):
         # If a piece is clicked in the given mouse position, makes a piece follow the mouse and hides it from the board.
         piece_clicked = self.get_piece_on_mouse(mouse_pos)
 
         if piece_clicked is not None:
+            if piece_clicked.get_color() != game_control.get_turn():
+                return
+
             forced_to_eat = False
 
             # Checks if a piece of the color of the piece clicked has a move that eats an opponent piece.
@@ -122,14 +125,21 @@ class BoardGUI:
 
             self.set_held_piece(int(piece_clicked.get_position()), mouse_pos)
     
-    def release_piece(self):
+    def release_piece(self, game_control):
         # If a piece is released, tell the board to execute the move, remove all marks and stop holding the piece.
         if self.held_piece is not None:
             released_on = self.held_piece.check_collision(self.move_marks)
 
             if released_on is not None:
+                piece_moved = self.board.get_piece_by_index(self.held_piece_index).get_color()
+
                 self.board.move_piece(self.held_piece_index, get_piece_position((released_on.x, released_on.y), SQUARE_DIST, TOPLEFTBORDER))
                 self.update_board()
+
+                if self.check_winner(piece_moved):
+                    game_control.change_winner(piece_moved)
+                
+                game_control.change_turn()
             
             self.set_held_piece(-1, None)
             self.move_marks = []
@@ -181,3 +191,9 @@ class BoardGUI:
         self.piece_rects = self.get_piece_rects(pieces)
         self.piece_colors = self.get_piece_colors(pieces)
         self.piece_status = self.get_piece_status(pieces)
+    
+    def check_winner(self, last_move_color):
+        pieces = self.board.get_pieces()
+        opponent_pieces = len(list(filter(lambda piece: piece.get_color() != last_move_color, pieces)))
+
+        return opponent_pieces == 0
