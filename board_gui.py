@@ -96,9 +96,28 @@ class BoardGUI:
         piece_clicked = self.get_piece_on_mouse(mouse_pos)
 
         if piece_clicked is not None:
-            for possible_move in piece_clicked.get_moves(self.board):
-                row = self.board.get_row_number(int(possible_move))
-                column = self.board.get_col_number(int(possible_move))
+            forced_to_eat = False
+
+            # Checks if a piece of the color of the piece clicked has a move that eats an opponent piece.
+            # If it does, allow only moves to eat pieces.
+            for piece in self.board.get_pieces():
+                for move in piece.get_moves(self.board):
+                    if move["eats_piece"]:
+                        if piece.get_color() == piece_clicked.get_color():
+                            forced_to_eat = True
+                            break
+                else:
+                    continue
+                break
+            
+            piece_moves = piece_clicked.get_moves(self.board)
+
+            if forced_to_eat:
+                piece_moves = list(filter(lambda move: move["eats_piece"] == True, piece_moves))
+
+            for possible_move in piece_moves:
+                row = self.board.get_row_number(int(possible_move["position"]))
+                column = self.board.get_col_number(int(possible_move["position"]))
                 self.move_marks.append(pygame.Rect(get_piece_gui_coords((row, column), SQUARE_DIST, TOPLEFTBORDER), (44, 44)))
 
             self.set_held_piece(int(piece_clicked.get_position()), mouse_pos)
