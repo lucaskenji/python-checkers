@@ -131,15 +131,19 @@ class BoardGUI:
             released_on = self.held_piece.check_collision(self.move_marks)
 
             if released_on is not None:
-                piece_moved = self.board.get_piece_by_index(self.held_piece_index).get_color()
+                piece_moved = self.board.get_piece_by_index(self.held_piece_index)
 
                 self.board.move_piece(self.held_piece_index, get_piece_position((released_on.x, released_on.y), SQUARE_DIST, TOPLEFTBORDER))
                 self.update_board()
 
-                if self.check_winner(piece_moved):
-                    game_control.change_winner(piece_moved)
+                if self.check_winner(piece_moved.get_color()):
+                    game_control.change_winner(piece_moved.get_color())
                 
-                game_control.change_turn()
+                # Check if player can eat another piece, granting an extra turn.
+                eat_moves = list(filter(lambda move: move["eats_piece"] == True, piece_moved.get_moves(self.board)))
+                
+                if len(eat_moves) == 0 or piece_moved.get_has_eaten() == False:
+                    game_control.change_turn()
             
             self.set_held_piece(-1, None)
             self.move_marks = []

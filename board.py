@@ -115,6 +115,9 @@ class Board:
         # Delete piece from the board if this move eats another piece
         if is_eat_movement(int(piece_to_move.get_position())):
             self.pieces.pop(get_eaten_index(int(piece_to_move.get_position()))) 
+            piece_to_move.set_has_eaten(True)
+        else:
+            piece_to_move.set_has_eaten(False)
 
         # Turn piece into a king if it reaches the other side of the board
         if is_king_movement(piece_to_move):

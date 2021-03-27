@@ -4,6 +4,7 @@ class Piece:
     def __init__(self, name):
         # Example: <position><color><isKing?> 16WN
         self.name = name
+        self.has_eaten = False # True if the piece instance has eaten a piece in its last move
     
     def get_name(self):
         return self.name
@@ -13,6 +14,9 @@ class Piece:
 
     def get_color(self):
         return self.name[-2]
+    
+    def get_has_eaten(self):
+        return self.has_eaten
 
     def is_king(self):
         return True if self.name[-1] == 'Y' else False
@@ -26,7 +30,10 @@ class Piece:
     def set_is_king(self, new_is_king):
         is_king = "Y" if new_is_king else "N"
         self.name = self.name[:-1] + is_king
-    
+
+    def set_has_eaten(self, has_eaten):
+        self.has_eaten = has_eaten
+
     def get_adjacent_squares(self, board):
         # Receives a Board object, returns at max four squares, all of which are potential moves
         current_col = board.get_col_number(int(self.get_position()))
