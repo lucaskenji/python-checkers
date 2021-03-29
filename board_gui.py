@@ -135,8 +135,8 @@ class BoardGUI:
 
                 self.board.move_piece(self.held_piece_index, get_piece_position((released_on.x, released_on.y), SQUARE_DIST, TOPLEFTBORDER))
                 self.update_board()
-
-                if self.check_winner(piece_moved.get_color()):
+                
+                if self.board.has_winner():
                     game_control.change_winner(piece_moved.get_color())
                 
                 # Check if player can eat another piece, granting an extra turn.
@@ -195,9 +195,3 @@ class BoardGUI:
         self.piece_rects = self.get_piece_rects(pieces)
         self.piece_colors = self.get_piece_colors(pieces)
         self.piece_status = self.get_piece_status(pieces)
-    
-    def check_winner(self, last_move_color):
-        pieces = self.board.get_pieces()
-        opponent_pieces = len(list(filter(lambda piece: piece.get_color() != last_move_color, pieces)))
-
-        return opponent_pieces == 0

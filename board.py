@@ -125,3 +125,15 @@ class Board:
 
         # Actually move
         piece_to_move.set_position(new_position)
+    
+    def has_winner(self):
+        # Returns True if the board has a winner
+        current_color = self.pieces[0].get_color()
+
+        for piece in self.pieces:
+            if piece.get_color() != current_color:
+                break
+        else:
+            return True
+        
+        return False
