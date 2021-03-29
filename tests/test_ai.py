@@ -22,4 +22,4 @@ def test_get_move():
     # get_move() should return the move with the maximum value
     test_ai = AI('B')
     test_board = Board([Piece('9WN'), Piece('17BN'), Piece('21BN')], 'B')
-    assert test_ai.get_move(test_board) == {"position_from": "21", "position_to": "18", "eats_piece": True}
+    assert test_ai.get_move(test_board) in [{"position_from": "17", "position_to": "13"}, {"position_from": "21", "position_to": "18"}]

@@ -76,7 +76,7 @@ class Board:
         
         return results
     
-    def move_piece(self, index, new_position):
+    def move_piece(self, moved_index, new_position):
         def is_eat_movement(current_position):
             # If the difference in the rows of the current and next positions isn't 1, i.e. if the piece isn't moving one square, 
             # then the piece is eating another piece.
@@ -110,7 +110,7 @@ class Board:
 
             return end_row == king_row
 
-        piece_to_move = self.pieces[index]
+        piece_to_move = self.pieces[moved_index]
 
         # Delete piece from the board if this move eats another piece
         if is_eat_movement(int(piece_to_move.get_position())):
