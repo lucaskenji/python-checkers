@@ -12,7 +12,6 @@ def main():
     pg.display.set_caption('Checkers in Python')
     fps_clock = pg.time.Clock()
 
-    board_gui = BoardGUI((26, 26))
     game_control = GameControl("W")
 
     main_font = pg.font.SysFont("Arial", 25)
@@ -21,7 +20,7 @@ def main():
 
     while True:
         DISPLAYSURF.fill((0, 0, 0))
-        board_gui.draw_gui(DISPLAYSURF)
+        game_control.draw_screen(DISPLAYSURF)
 
         turn_display_text = "White's turn" if game_control.get_turn() == "W" else "Black's turn"
         DISPLAYSURF.blit(main_font.render(turn_display_text, True, (255, 255, 255)), turn_rect)
@@ -36,10 +35,10 @@ def main():
                 return
             
             if event.type == MOUSEBUTTONDOWN:
-                board_gui.hold_piece_with_mouse(event.pos, game_control)
+                game_control.hold_piece(event.pos)
             
             if event.type == MOUSEBUTTONUP:
-                board_gui.release_piece(game_control)
+                game_control.release_piece()
         
         pg.display.update()
         fps_clock.tick(FPS)

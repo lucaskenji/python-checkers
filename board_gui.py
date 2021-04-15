@@ -1,197 +1,105 @@
-from board import Board
-from piece import Piece
-from held_piece import HeldPiece
-from utils import get_piece_gui_coords, get_surface_mouse_offset, get_piece_position
+from utils import get_piece_gui_coords, get_piece_position
 import pygame
 
+# Preload images
 BLACK_PIECE_SURFACE = pygame.image.load("images/black_piece.png")
 WHITE_PIECE_SURFACE = pygame.image.load("images/white_piece.png")
 BLACK_KING_PIECE_SURFACE = pygame.image.load("images/black_king_piece.png")
 WHITE_KING_PIECE_SURFACE = pygame.image.load("images/white_king_piece.png")
+MOVE_MARK = pygame.image.load("images/marking.png")
 BOARD = pygame.image.load("images/board.png")
+
+# GUI specifications
+BOARD_POSITION = (26, 26)
 TOPLEFTBORDER = (34, 34)
 SQUARE_DIST = 56
 
 class BoardGUI:
-    def __init__(self, board_rect):
-        # Initial setup
-        pieces = []
-
-        for opponent_piece in range(0, 12):
-            pieces.append(Piece(str(opponent_piece) + 'BN'))
-        
-        for player_piece in range(20, 32):
-            pieces.append(Piece(str(player_piece) + 'WN'))
-
-        # Attributes
-        self.board = Board(pieces, "W")
-        self.piece_rects = self.get_piece_rects(pieces)
-        self.piece_colors = self.get_piece_colors(pieces)
-        self.piece_status = self.get_piece_status(pieces)
-        self.board_rect = board_rect
-        self.held_piece = None
-        self.held_piece_index = -1
+    def __init__(self, board):
+        self.pieces = self.get_piece_properties(board)
+        self.hidden_piece = -1 # This attribute is -1 when no piece must be hidden
         self.move_marks = []
 
-    def get_piece_rects(self, pieces):
-        # Receives a list of Piece instances, returns a list of appropriate positions on the board as a tuple (x, y)
-        rects = []
+    def set_pieces(self, piece_list):
+        self.pieces = piece_list
 
-        for piece in pieces:
-            pos = int(piece.get_position())
-            row = self.board.get_row_number(pos)
-            column = self.board.get_col_number(pos)
+    def get_piece_properties(self, board):
+        # Receives a board object, returns a list of its pieces organized in 3 dictionary keys.
+        initial_pieces = board.get_pieces()
+        pieces = []
+
+        for piece in initial_pieces:
+            piece_position = int(piece.get_position())
+            piece_row = board.get_row_number(piece_position)
+            piece_column = board.get_col_number(piece_position)
+            piece_properties = dict()
+
+            piece_properties["rect"] = pygame.Rect(get_piece_gui_coords((piece_row, piece_column), SQUARE_DIST, TOPLEFTBORDER), (41, 41))
+            piece_properties["color"] = piece.get_color()
+            piece_properties["is_king"] = piece.is_king()
+
+            pieces.append(piece_properties)
+        
+        return pieces
+    
+    def get_piece_by_index(self, index):
+        return self.pieces[index]
+
+    def hide_piece(self, index):
+        # Index of Board pieces and BoardGUI pieces is kept the same.
+        self.hidden_piece = index
+    
+    def show_piece(self):
+        # Reveals hidden piece and returns the piece index
+        piece_shown = self.hidden_piece
+        self.hidden_piece = -1
+        return piece_shown
+
+    def draw_pieces(self, display_surface):
+        for index, piece in enumerate(self.pieces):
+            if index == self.hidden_piece:
+                continue
             
-            # Calculates where the piece should be based on row and column positions
-            rects.append(pygame.Rect(get_piece_gui_coords((row, column), SQUARE_DIST, TOPLEFTBORDER), (41, 41)))
-        
-        return rects
-    
-    def get_piece_colors(self, pieces):
-        # Receives a list of Piece instances, returns the color of the piece. Used to render proper colored pieces on the board.
-        colors = []
-
-        for piece in pieces:
-            colors.append(piece.get_color())
-        
-        return colors
-    
-    def get_piece_status(self, pieces):
-        # Receives a list of Piece instances, returns if the piece is a king. Used to render kings on the board.
-        status = []
-
-        for piece in pieces:
-            status.append(piece.is_king())
-        
-        return status
-
-    def draw_gui(self, display_surface):
-        # Draws the board along with its pieces and any piece being held with the mouse.
-        self.draw_board(display_surface)
-        
-        image_rect = pygame.image.load("images/marking.png")
-
-        if self.held_piece is not None:
-            for move_mark in self.move_marks:
-                display_surface.blit(image_rect, move_mark)
-
-            self.held_piece.draw_piece(display_surface)
-
-    def draw_board(self, display_surface):
-        # Draws a board and its pieces on the display surface.
-        display_surface.blit(BOARD, self.board_rect)
-
-        for index, piece_rect in enumerate(self.piece_rects):
-            if self.held_piece is not None:
-                if index == self.held_piece_index:
-                    continue
-
-            if self.piece_status[index]:
-                display_surface.blit(BLACK_KING_PIECE_SURFACE if self.piece_colors[index] == "B" else WHITE_KING_PIECE_SURFACE, piece_rect)
+            if piece["is_king"]:
+                display_surface.blit(BLACK_KING_PIECE_SURFACE if piece["color"] == "B" else WHITE_KING_PIECE_SURFACE, piece["rect"])
             else:
-                display_surface.blit(BLACK_PIECE_SURFACE if self.piece_colors[index] == "B" else WHITE_PIECE_SURFACE, piece_rect)
+                display_surface.blit(BLACK_PIECE_SURFACE if piece["color"] == "B" else WHITE_PIECE_SURFACE, piece["rect"])
     
-    def hold_piece_with_mouse(self, mouse_pos, game_control):
-        # If a piece is clicked in the given mouse position, makes a piece follow the mouse and hides it from the board.
-        piece_clicked = self.get_piece_on_mouse(mouse_pos)
-
-        if piece_clicked is not None:
-            if piece_clicked.get_color() != game_control.get_turn():
-                return
-
-            forced_to_eat = False
-
-            # Checks if a piece of the color of the piece clicked has a move that eats an opponent piece.
-            # If it does, allow only moves to eat pieces.
-            for piece in self.board.get_pieces():
-                for move in piece.get_moves(self.board):
-                    if move["eats_piece"]:
-                        if piece.get_color() == piece_clicked.get_color():
-                            forced_to_eat = True
-                            break
-                else:
-                    continue
-                break
-            
-            piece_moves = piece_clicked.get_moves(self.board)
-
-            if forced_to_eat:
-                piece_moves = list(filter(lambda move: move["eats_piece"] == True, piece_moves))
-
-            for possible_move in piece_moves:
-                row = self.board.get_row_number(int(possible_move["position"]))
-                column = self.board.get_col_number(int(possible_move["position"]))
-                self.move_marks.append(pygame.Rect(get_piece_gui_coords((row, column), SQUARE_DIST, TOPLEFTBORDER), (44, 44)))
-
-            self.set_held_piece(int(piece_clicked.get_position()), mouse_pos)
+    def draw_board(self, display_surface):
+        display_surface.blit(BOARD, BOARD_POSITION)
+        
+        # Also draws move marks if needed.
+        if len(self.move_marks) != 0:
+            for rect in self.move_marks:
+                display_surface.blit(MOVE_MARK, rect)
     
-    def release_piece(self, game_control):
-        # If a piece is released, tell the board to execute the move, remove all marks and stop holding the piece.
-        if self.held_piece is not None:
-            released_on = self.held_piece.check_collision(self.move_marks)
+    def get_piece_on_mouse(self, mouse_pos):
+        for index, piece in enumerate(self.pieces):
+            if piece["rect"].collidepoint(mouse_pos):
+                return {"index": index, "piece": piece}
+        
+        return None
 
-            if released_on is not None:
-                piece_moved = self.board.get_piece_by_index(self.held_piece_index)
+    def get_surface(self, piece):
+        # Returns a proper surface for the given piece.
+        surfaces = [BLACK_PIECE_SURFACE, WHITE_PIECE_SURFACE, BLACK_KING_PIECE_SURFACE, WHITE_KING_PIECE_SURFACE]
+        surfaces = surfaces[2:] if piece.is_king() else surfaces[:2]
 
-                self.board.move_piece(self.held_piece_index, get_piece_position((released_on.x, released_on.y), SQUARE_DIST, TOPLEFTBORDER))
-                self.update_board()
-                
-                if self.board.has_winner():
-                    game_control.change_winner(piece_moved.get_color())
-                
-                # Check if player can eat another piece, granting an extra turn.
-                eat_moves = list(filter(lambda move: move["eats_piece"] == True, piece_moved.get_moves(self.board)))
-                
-                if len(eat_moves) == 0 or piece_moved.get_has_eaten() == False:
-                    game_control.change_turn()
-            
-            self.set_held_piece(-1, None)
+        return surfaces[0] if piece.get_color() == 'B' else surfaces[1]
+
+    def get_move_marks(self):
+        return self.move_marks
+
+    def set_move_marks(self, position_list):
+        # Sets a list of move marks based on a list of (row, column) tuples.
+        if len(position_list) == 0:
             self.move_marks = []
 
-    def get_piece_on_mouse(self, mouse_pos):
-        # Given a tuple with the mouse's x and y position, returns the piece clicked or None if no piece was clicked.
-        piece_index = -1
+        for position in position_list:
+            row = position[0]
+            column = position[1]   
+            self.move_marks.append(pygame.Rect(get_piece_gui_coords((row, column), SQUARE_DIST, TOPLEFTBORDER), (44, 44)))
 
-        for index, piece_rect in enumerate(self.piece_rects):
-            if piece_rect.collidepoint(mouse_pos):
-                piece_index = index
-                break
-        else:
-            return None
-        
-        return self.board.get_piece_by_index(piece_index)
-    
-    def set_held_piece(self, position, mouse_pos):
-        # Given a piece's position as an integer, finds the piece object and sets held_piece and held_piece_index.
-        # Sets held_piece to None if -1 is given as a position.
-        if position == -1:
-            self.held_piece = None
-            self.held_piece_index = -1
-            return
-
-        piece_row = self.board.get_row_number(position)
-        piece_column = self.board.get_col_number(position)
-
-        piece_rect = pygame.Rect(get_piece_gui_coords((piece_row, piece_column), SQUARE_DIST, TOPLEFTBORDER), (41, 41))
-
-        for index, rect in enumerate(self.piece_rects):
-            if rect.colliderect(piece_rect):
-                piece_to_hold = self.board.get_piece_by_index(index)
-                offset = get_surface_mouse_offset(piece_rect, mouse_pos)
-                self.held_piece = HeldPiece(self.get_piece_surface(piece_to_hold.get_color(), piece_to_hold.is_king()), offset)
-                self.held_piece_index = index
-    
-    def get_piece_surface(self, color, is_king):
-        # Given color and king properties, returns an appropriate surface.
-        piece_surfaces = [BLACK_KING_PIECE_SURFACE, WHITE_KING_PIECE_SURFACE] if is_king else [BLACK_PIECE_SURFACE, WHITE_PIECE_SURFACE]
-
-        if color == "B":
-            return piece_surfaces[0]
-        else:
-            return piece_surfaces[1]
-    
-    def update_board(self):
-        pieces = self.board.get_pieces()
-        self.piece_rects = self.get_piece_rects(pieces)
-        self.piece_colors = self.get_piece_colors(pieces)
-        self.piece_status = self.get_piece_status(pieces)
+    def get_position_by_rect(self, rect):
+        # Receives a rect and returns a (row, column) tuple containing the position on the board.
+        return get_piece_position((rect.x, rect.y), SQUARE_DIST, TOPLEFTBORDER)
