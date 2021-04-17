@@ -10,7 +10,7 @@ class AI:
 
 	def minimax(self, current_board, is_maximizing, depth, turn):
 		# Tries to find recursively the best value depending on which player is passed as an argument to the function
-		if depth == 0 or current_board.has_winner():
+		if depth == 0 or current_board.get_winner() is not None:
 			return self.get_value(current_board)
 		
 		next_turn = 'B' if turn == 'W' else 'W'
@@ -73,9 +73,9 @@ class AI:
 		for move in possible_moves:
 			aux_board = Board(deepcopy(current_pieces), board_color_up)
 			aux_board.move_piece(move["piece"], int(move["move"]["position"]))
-			move_scores.append(self.minimax(aux_board, False, 5, next_turn))
+			move_scores.append(self.minimax(aux_board, False, 2, next_turn))
 
-		best_score = max(*move_scores)
+		best_score = max(move_scores)
 		best_moves = []
 
 		for index, move in enumerate(possible_moves):
@@ -92,7 +92,7 @@ class AI:
 		# The value is higher if the board benefits this AI and lower otherwise.
 		board_pieces = board.get_pieces()
 
-		if board.has_winner():
+		if board.get_winner() is not None:
 			if board_pieces[0].get_color() == self.color:
 				return 2
 			else:

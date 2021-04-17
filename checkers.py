@@ -7,12 +7,13 @@ from game_control import GameControl
 def main():
     pg.init()
     FPS = 30
-    
+    PLAYER_COLOR = "W"
+
     DISPLAYSURF = pg.display.set_mode((700, 500))
     pg.display.set_caption('Checkers in Python')
     fps_clock = pg.time.Clock()
 
-    game_control = GameControl("W")
+    game_control = GameControl(PLAYER_COLOR, True)
 
     main_font = pg.font.SysFont("Arial", 25)
     turn_rect = (509, 26)
@@ -39,6 +40,18 @@ def main():
             
             if event.type == MOUSEBUTTONUP:
                 game_control.release_piece()
+
+                if game_control.get_turn() != PLAYER_COLOR:
+                    pg.time.set_timer(USEREVENT, 400)
+            
+            if event.type == USEREVENT:
+                if game_control.get_winner() is not None:
+                    continue
+
+                game_control.move_ai()
+
+                if game_control.get_turn() == PLAYER_COLOR:
+                    pg.time.set_timer(USEREVENT, 0)
         
         pg.display.update()
         fps_clock.tick(FPS)

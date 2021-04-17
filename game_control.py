@@ -2,15 +2,21 @@ from piece import Piece
 from board import Board
 from board_gui import BoardGUI
 from held_piece import HeldPiece
+from ai import AI
 from utils import get_surface_mouse_offset, get_piece_position
 
 class GameControl:
-    def __init__(self, player_color):
+    def __init__(self, player_color, is_computer_opponent):
         self.turn = player_color
         self.winner = None
         self.board = None
         self.board_draw = None
         self.held_piece = None
+        self.ai_control = None
+
+        if is_computer_opponent:
+            self.ai_control = AI("B") if player_color == "W" else AI("W")
+
         self.setup()
 
     def get_turn(self):
@@ -95,7 +101,7 @@ class GameControl:
 
             # Check if player can eat another piece, granting an extra turn.
             jump_moves = list(filter(lambda move: move["eats_piece"] == True, piece_moved.get_moves(self.board)))
-                
+            
             if len(jump_moves) == 0 or piece_moved.get_has_eaten() == False:
                 self.turn = "B" if self.turn == "W" else "W"
 
@@ -107,3 +113,30 @@ class GameControl:
         surface = self.board_draw.get_surface(piece)
         offset = get_surface_mouse_offset(self.board_draw.get_piece_by_index(index)["rect"], mouse_pos)
         self.held_piece = HeldPiece(surface, offset)
+
+    def move_ai(self):
+        # Gets best move from an AI instance and moves it.
+        if self.turn == "W":
+            return
+
+        optimal_move = self.ai_control.get_move(self.board)
+        index_moved = -1
+        piece_moved = None
+
+        for index, piece in enumerate(self.board.get_pieces()):
+            if piece.get_position() == optimal_move["position_from"]:
+                index_moved = index
+                piece_moved = piece
+                break
+        else:
+            raise RuntimeError("AI was supposed to return a move from an existing piece but found none.")
+        
+        self.board.move_piece(index_moved, int(optimal_move["position_to"]))
+        self.board_draw.set_pieces(self.board_draw.get_piece_properties(self.board))
+        self.winner = self.board.get_winner()
+
+        # Check if AI can eat another piece, granting an extra turn.
+        jump_moves = list(filter(lambda move: move["eats_piece"] == True, piece_moved.get_moves(self.board)))
+
+        if len(jump_moves) == 0 or piece_moved.get_has_eaten() == False:
+            self.turn = "B" if self.turn == "W" else "W"
