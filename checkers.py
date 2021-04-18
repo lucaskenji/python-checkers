@@ -1,10 +1,11 @@
 import pygame as pg
-from sys import exit
+from sys import exit, argv
 from pygame.locals import *
 from board_gui import BoardGUI
 from game_control import GameControl
 
-def main():
+def main(gamemode):
+    # Main setup
     pg.init()
     FPS = 30
     PLAYER_COLOR = "W"
@@ -12,14 +13,21 @@ def main():
     DISPLAYSURF = pg.display.set_mode((700, 500))
     pg.display.set_caption('Checkers in Python')
     fps_clock = pg.time.Clock()
+    game_control = None
 
-    game_control = GameControl(PLAYER_COLOR, True)
+    # Creates a GameControl with an AI instance if gamemode is "cpu"
+    if gamemode == "cpu":
+        game_control = GameControl(PLAYER_COLOR, True)
+    else:
+        game_control = GameControl(PLAYER_COLOR, False)
 
+    # Font setup
     main_font = pg.font.SysFont("Arial", 25)
     turn_rect = (509, 26)
     winner_rect = (509, 152)
 
     while True:
+        # GUI
         DISPLAYSURF.fill((0, 0, 0))
         game_control.draw_screen(DISPLAYSURF)
 
@@ -30,6 +38,7 @@ def main():
             winner_display_text = "White wins!" if game_control.get_winner() == "W" else "Black wins!"
             DISPLAYSURF.blit(main_font.render(winner_display_text, True, (255, 255, 255)), winner_rect)
 
+        # Event handling
         for event in pg.event.get():
             if event.type == QUIT:
                 pg.quit()
@@ -41,10 +50,11 @@ def main():
             if event.type == MOUSEBUTTONUP:
                 game_control.release_piece()
 
-                if game_control.get_turn() != PLAYER_COLOR:
+                if game_control.get_turn() != PLAYER_COLOR and gamemode == "cpu":
                     pg.time.set_timer(USEREVENT, 400)
             
             if event.type == USEREVENT:
+                # AI movement
                 if game_control.get_winner() is not None:
                     continue
 
@@ -57,5 +67,12 @@ def main():
         fps_clock.tick(FPS)
 
 if __name__ == '__main__':
-    main()
+    if len(argv) != 2:
+        print("Please specify the game mode. Example: python checkers.py cpu")
+    else:
+        if argv[1] in ["cpu", "pvp"]:
+            main(argv[1])
+        else:
+            print("Game mode not found.")
+    
     exit()
